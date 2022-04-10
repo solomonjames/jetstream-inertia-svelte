@@ -1,18 +1,15 @@
 <script>
   import { Inertia } from '@inertiajs/inertia';
   import route from 'ziggy';
-  import { Link } from '@inertiajs/inertia-svelte';
+  import { Link, page } from '@inertiajs/inertia-svelte';
   import JetApplicationMark from '@/Jetstream/ApplicationMark.svelte';
   import JetBanner from '@/Jetstream/Banner.svelte';
-  import JetDropdown from '@/Jetstream/Dropdown.vue';
-  import JetDropdownLink from '@/Jetstream/DropdownLink.vue';
-  import JetNavLink from '@/Jetstream/NavLink.vue';
-  import JetResponsiveNavLink from '@/Jetstream/ResponsiveNavLink.vue';
+  import JetDropdown from '@/Jetstream/Dropdown.svelte';
+  import JetDropdownLink from '@/Jetstream/DropdownLink.svelte';
+  import JetNavLink from '@/Jetstream/NavLink.svelte';
+  import JetResponsiveNavLink from '@/Jetstream/ResponsiveNavLink.svelte';
 
-  export let title,
-    user,
-    team,
-    jetstream;
+  export let title;
 
   let showingNavigationDropdown = false;
 
@@ -60,12 +57,13 @@
           <div class="hidden sm:flex sm:items-center sm:ml-6">
             <div class="ml-3 relative">
               <!-- Teams Dropdown -->
-              {#if jetstream.hasTeamFeatures}
-              <JetDropdown align="right" width="60">
-                  <span class="inline-flex rounded-md">
+              {#if $page.props.jetstream.hasTeamFeatures}
+                <JetDropdown align="right" width="60">
+                  <svelte:fragment slot="trigger">
+                    <span class="inline-flex rounded-md">
                       <button type="button"
                               class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition">
-                          { user.current_team.name }
+                          { $page.props.user.current_team.name }
 
                         <svg
                           class="ml-2 -mr-0.5 h-4 w-4"
@@ -78,89 +76,96 @@
                                     clip-rule="evenodd"/>
                           </svg>
                       </button>
-                  </span>
+                    </span>
+                  </svelte:fragment>
 
-                  <div class="w-60">
-                    <!-- Team Management -->
-                    {#if jetstream.hasTeamFeatures}
-                      <div class="block px-4 py-2 text-xs text-gray-400">
-                        Manage Team
-                      </div>
+                  <svelte:fragment slot="content">
+                    <div class="w-60">
+                      <!-- Team Management -->
+                      {#if $page.props.jetstream.hasTeamFeatures}
+                        <div class="block px-4 py-2 text-xs text-gray-400">
+                          Manage Team
+                        </div>
 
-                      <!-- Team Settings -->
-                      <JetDropdownLink href="{route('teams.show', user.current_team)}">
-                        Team Settings
-                      </JetDropdownLink>
+                        <!-- Team Settings -->
+                        <JetDropdownLink href="{route('teams.show', $page.props.user.current_team)}">
+                          Team Settings
+                        </JetDropdownLink>
 
-                      {#if jetstream.canCreateTeams}
-                      <JetDropdownLink href="{route('teams.create')}">
-                        Create New Team
-                      </JetDropdownLink>
-                      {/if}
-
-                      <div class="border-t border-gray-100"/>
-
-                      <!-- Team Switcher -->
-                      <div class="block px-4 py-2 text-xs text-gray-400">
-                        Switch Teams
-                      </div>
-
-                      {#each user.all_teams as team, i (team.id)}
-                        <form on:submit|preventDefault={() => switchToTeam(team)}>
-                          <JetDropdownLink as="button">
-                            <div class="flex items-center">
-                              {#if team.id === user.current_team_id}
-                              <svg
-                                class="mr-2 h-5 w-5 text-green-400"
-                                fill="none"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                              </svg>
-                              {/if}
-                              <div>{ team.name }</div>
-                            </div>
+                        {#if $page.props.jetstream.canCreateTeams}
+                          <JetDropdownLink href="{route('teams.create')}">
+                            Create New Team
                           </JetDropdownLink>
-                        </form>
-                      {/each}
-                    {/if}
-                  </div>
-              </JetDropdown>
+                        {/if}
+
+                        <div class="border-t border-gray-100"/>
+
+                        <!-- Team Switcher -->
+                        <div class="block px-4 py-2 text-xs text-gray-400">
+                          Switch Teams
+                        </div>
+
+                        {#each $page.props.user.all_teams as team (team.id)}
+                          <form on:submit|preventDefault={() => switchToTeam(team)}>
+                            <JetDropdownLink as="button">
+                              <div class="flex items-center">
+                                {#if team.id === $page.props.user.current_team_id}
+                                  <svg
+                                    class="mr-2 h-5 w-5 text-green-400"
+                                    fill="none"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                  </svg>
+                                {/if}
+                                <div>{ team.name }</div>
+                              </div>
+                            </JetDropdownLink>
+                          </form>
+                        {/each}
+                      {/if}
+                    </div>
+                  </svelte:fragment>
+                </JetDropdown>
               {/if}
             </div>
 
             <!-- Settings Dropdown -->
             <div class="ml-3 relative">
               <JetDropdown align="right" width="48">
-                {#if jetstream.managesProfilePhotos}
-                  <button class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
-                    <img class="h-8 w-8 rounded-full object-cover" src="{user.profile_photo_url}"
-                         alt="{user.name}">
-                  </button>
+                <svelte:fragment slot="trigger">
+                  {#if $page.props.jetstream.managesProfilePhotos}
+                    <button
+                      class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
+                      <img class="h-8 w-8 rounded-full object-cover" src="{$page.props.user.profile_photo_url}"
+                           alt="{$page.props.user.name}">
+                    </button>
                   {:else}
-                  <span class="inline-flex rounded-md">
-                      <button type="button"
-                              class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition">
-                          { user.name }
+                    <span class="inline-flex rounded-md">
+                        <button type="button"
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition">
+                            { $page.props.user.name }
 
-                        <svg
-                          class="ml-2 -mr-0.5 h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                              <path fill-rule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                    clip-rule="evenodd"/>
-                          </svg>
-                      </button>
-                  </span>
-                {/if}
+                          <svg
+                            class="ml-2 -mr-0.5 h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                                <path fill-rule="evenodd"
+                                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                      clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </span>
+                  {/if}
+                </svelte:fragment>
 
+                <svelte:fragment slot="content">
                   <!-- Account Management -->
                   <div class="block px-4 py-2 text-xs text-gray-400">
                     Manage Account
@@ -170,11 +175,11 @@
                     Profile
                   </JetDropdownLink>
 
-                {#if jetstream.hasApiFeatures}
-                  <JetDropdownLink href="{route('api-tokens.index')}">
-                    API Tokens
-                  </JetDropdownLink>
-                {/if}
+                  {#if $page.props.jetstream.hasApiFeatures}
+                    <JetDropdownLink href="{route('api-tokens.index')}">
+                      API Tokens
+                    </JetDropdownLink>
+                  {/if}
 
                   <div class="border-t border-gray-100"/>
 
@@ -184,6 +189,7 @@
                       Log Out
                     </JetDropdownLink>
                   </form>
+                </svelte:fragment>
               </JetDropdown>
             </div>
           </div>
@@ -232,19 +238,19 @@
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
           <div class="flex items-center px-4">
-            {#if jetstream.managesProfilePhotos}
-            <div class="shrink-0 mr-3">
-              <img class="h-10 w-10 rounded-full object-cover" src={user.profile_photo_url}
-                   alt={user.name}>
-            </div>
+            {#if $page.props.jetstream.managesProfilePhotos}
+              <div class="shrink-0 mr-3">
+                <img class="h-10 w-10 rounded-full object-cover" src={$page.props.user.profile_photo_url}
+                     alt={$page.props.user.name}>
+              </div>
             {/if}
 
             <div>
               <div class="font-medium text-base text-gray-800">
-                { user.name }
+                { $page.props.user.name }
               </div>
               <div class="font-medium text-sm text-gray-500">
-                { user.email }
+                { $page.props.user.email }
               </div>
             </div>
           </div>
@@ -254,11 +260,11 @@
               Profile
             </JetResponsiveNavLink>
 
-            {#if jetstream.hasApiFeatures}
-            <JetResponsiveNavLink href="{route('api-tokens.index')}"
-                                  active={route().current('api-tokens.index')}>
-              API Tokens
-            </JetResponsiveNavLink>
+            {#if $page.props.jetstream.hasApiFeatures}
+              <JetResponsiveNavLink href="{route('api-tokens.index')}"
+                                    active={route().current('api-tokens.index')}>
+                API Tokens
+              </JetResponsiveNavLink>
             {/if}
 
             <!-- Authentication -->
@@ -269,24 +275,24 @@
             </form>
 
             <!-- Team Management -->
-            {#if jetstream.hasTeamFeatures}
-              <div class="border-t border-gray-200" />
+            {#if $page.props.jetstream.hasTeamFeatures}
+              <div class="border-t border-gray-200"/>
 
               <div class="block px-4 py-2 text-xs text-gray-400">
                 Manage Team
               </div>
 
               <!-- Team Settings -->
-              <JetResponsiveNavLink href="{route('teams.show', user.current_team)}"
+              <JetResponsiveNavLink href="{route('teams.show', $page.props.user.current_team)}"
                                     active={route().current('teams.show')}>
                 Team Settings
               </JetResponsiveNavLink>
 
-              {#if jetstream.canCreateTeams}
-              <JetResponsiveNavLink href="{route('teams.create')}"
-                                    active={route().current('teams.create')}>
-                Create New Team
-              </JetResponsiveNavLink>
+              {#if $page.props.jetstream.canCreateTeams}
+                <JetResponsiveNavLink href="{route('teams.create')}"
+                                      active={route().current('teams.create')}>
+                  Create New Team
+                </JetResponsiveNavLink>
               {/if}
 
               <div class="border-t border-gray-200"/>
@@ -296,22 +302,22 @@
                 Switch Teams
               </div>
 
-              {#each user.all_teams as team, i (team.id)}
-                <form on:submit|preventDefault={switchToTeam(team)}>
+              {#each $page.props.user.all_teams as team (team.id)}
+                <form on:submit|preventDefault={() => switchToTeam(team)}>
                   <JetResponsiveNavLink as="button">
                     <div class="flex items-center">
-                      {#if team.id === user.current_team_id}
-                      <svg
-                        class="mr-2 h-5 w-5 text-green-400"
-                        fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
+                      {#if team.id === $page.props.user.current_team_id}
+                        <svg
+                          class="mr-2 h-5 w-5 text-green-400"
+                          fill="none"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                       {/if}
                       <div>{ team.name }</div>
                     </div>
@@ -326,11 +332,11 @@
 
     <!-- Page Heading -->
     {#if $$slots.header}
-    <header class="bg-white shadow">
-      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <slot name="header" />
-      </div>
-    </header>
+      <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <slot name="header"/>
+        </div>
+      </header>
     {/if}
 
     <!-- Page Content -->

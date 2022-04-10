@@ -1,14 +1,14 @@
 require('./bootstrap');
 
-import { App, createInertiaApp } from '@inertiajs/inertia-svelte';
+import { createInertiaApp } from '@inertiajs/inertia-svelte';
 import { InertiaProgress } from '@inertiajs/progress';
 
-const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
+const appName = 'JamesTest';
 
 createInertiaApp({
   title: (title) => `${title} - ${appName}`,
   resolve: (name) => require(`./Pages/${name}.svelte`),
-  setup({ el, props }) {
+  setup({ el, App, props }) {
     new App({ target: el, props });
   },
 });
