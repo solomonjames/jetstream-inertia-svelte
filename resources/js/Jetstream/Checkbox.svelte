@@ -1,7 +1,15 @@
 <script>
+  import { createEventDispatcher } from 'svelte';
+
   export let
     checked = false,
     value = null;
+
+  const dispatch = createEventDispatcher();
+
+  $: {
+    dispatch('checked', checked);
+  }
 
   let classes = 'rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50';
 

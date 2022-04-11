@@ -19,6 +19,12 @@
     remember: false,
   });
 
+  $: {
+    console.log($form.remember);
+  }
+
+  const handleChecked = ({ detail }) => $form.remember = detail;
+
   const submit = () => {
     $form.transform(data => ({
       ...data,
@@ -71,8 +77,8 @@
     </div>
 
     <div class="block mt-4">
-      <label class="flex items-center" for="">
-        <JetCheckbox checked={$form.remember} name="remember"/>
+      <label class="flex items-center" for="remember">
+        <JetCheckbox checked={$form.remember} on:checked={handleChecked} id="remember" name="remember"/>
         <span class="ml-2 text-sm text-gray-600">Remember me</span>
       </label>
     </div>

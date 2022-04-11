@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import transitionClasses from '@/lib/transitions/classes';
+  import transitionClasses from '@/lib/svelte/transitions/classes';
 
   export let
     align = 'right',
@@ -26,7 +26,7 @@
     open = false;
   }
 
-  const alignmentClasses = () => {
+  $: alignmentClasses = (() => {
     if (align === 'left') {
       return 'origin-top-left left-0';
     }
@@ -36,7 +36,7 @@
     }
 
     return 'origin-top';
-  };
+  })();
 
   let classes = 'relative';
 
@@ -65,23 +65,20 @@
   </div>
 
   <!-- Full Screen Dropdown Overlay -->
-  {#if open}
-    <div class="fixed inset-0 z-40" on:click={close}/>
-  {/if}
+  <div style:display={open ? '' : 'none'} class="fixed inset-0 z-40" on:click={close}/>
 
   <div
     in:transitionClasses={transitionInClasses}
     out:transitionClasses={transitionOutClasses}
   >
-    {#if open}
     <div
-      class="absolute z-50 mt-2 rounded-md shadow-lg {alignmentClasses()} w-{width}"
+      class="absolute z-50 mt-2 rounded-md shadow-lg {alignmentClasses} w-{width}"
+      style:display={open ? '' : 'none'}
       on:click={close}
     >
       <div class="rounded-md ring-1 ring-black ring-opacity-5 {contentClasses}">
         <slot name="content" />
       </div>
     </div>
-    {/if}
   </div>
 </div>
